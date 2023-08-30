@@ -902,34 +902,6 @@ class ModelLoader:
 
 # ---------------------模型训练后相关工具--------------------------------
 
-def get_dosage(raw_prescription):
-   # 原本无剂量的药方获取对应的剂量
-   # raw_prescription为无剂量的药方，以字符串形式传入
-    dosage_table= {'桂枝':10, '桂枝+':10, '桂枝++':10, '麻黄':10, '麻黄+':10, '细辛':5, '杏仁':10, '防风':10,'防己':10,
-    '荆芥':10, '羌活':10, '独活':10, '大黄':10, '大黄+':10, '芒硝':10, '柴胡':20, '柴胡+':20, '黄芩':15, '桔梗':10, '瓜蒌皮':20,
-    '天花粉':20, '黄连':10, '栀子':10, '豆豉':10, '半夏':15, '白芍':10, '白芍+':10, '赤芍':10, '赤芍+':10, '当归':15, '五味子':5,
-    '木通':10, '茯苓':30, '白术':15, '黄芪':30, '党参':10, '党参+':10, '桃仁':10, '鸡内金':15, '蝉衣':10, '全蝎':5, '木瓜':15,
-    '茅根':15, '贝母':10, '茵陈':30, '葛根':30, '葛根+':30, '石膏':30, '知母':10, '干姜':10, '附子':10, '附子+':10, '枳实':10,
-    '枳实+':10, '厚朴':10, '厚朴+':10, '山药':30, '生姜':15, '生姜+':10, '大枣':15, '甘草':10, '龙骨':15, '牡蛎':15}
-
-    medicine_list = raw_prescription.split(' ')
-    content = {}
-    # 获取所有药物及计量，以键值对形式存入字典中
-    for item in medicine_list:
-        content[item] = dosage_table.get(item)
-    # 将带有XX+及XX++的药物计量转加到XX的剂量中
-    for key in content.keys():
-        if '+' in key:
-            value = content[key]
-            key_stripe = key.replace('+', '')
-            content[key_stripe] = content[key_stripe] + value
-            del content[key]
-    # 将字典content转为特定格式的字符串输出
-    result = ''
-    for key in content.keys():
-        result = result + key + raw_prescription(content[key]) + 'g '
-    return result
-
 
 def src_to_trg(model, source, numerize, target_itos):
     # src_to_trg方法将源数据经过模型输出结果（预测的target）
@@ -1053,7 +1025,7 @@ numerize = getTransform(train_src_vocab)
 src_itos = train_src_vocab.get_itos()
 trg_itos = train_trg_vocab.get_itos()
 
-val_data_path = './test.txt'
+val_data_path = './val_data.txt'
 val_bz = 10
 val_datapipe = DataPipe(val_data_path, vocabs=train_vocabs , batch_size=val_bz, batch_num=5)
 val_dp = val_datapipe.get_datapipe()
@@ -1092,7 +1064,7 @@ if torch.cuda.is_available():
     criterion.cuda()
 
 # 设置保存路径
-save_dict = 'test_dict/'
+save_dict = 'modelDict/'
 
 # ----------------------------测试区A--------------------------------------
 
@@ -1107,7 +1079,7 @@ if __name__ == '__main__':
     print(f"当前时间: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}")
     print('\n\n')
 
-    # run(transformer_model, loss_compute, train_dp, val_dp, train_vocabs, save_dict=save_dict, epochs=96)
+    run(transformer_model, loss_compute, train_dp, val_dp, train_vocabs, save_dict=save_dict, epochs=35)
 
 # ----------------------------测试区B--------------------------------------
 
@@ -1115,10 +1087,8 @@ if __name__ == '__main__':
     path_checkpiont = './modelDict/checkpoint.pth'
 
     ml = ModelLoader(path_model, path_checkpiont, loss_compute)
-    # ml.run_model(train_dp, val_dp, save_dict, epochs=48)
     ml.run_test(val_dp, is_save=True)
 
-    # get_tsv(ml.model, 'tsv_dir/', ml.vocabs[0])
 
 
 
