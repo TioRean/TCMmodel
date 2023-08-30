@@ -1,2 +1,3 @@
 # TCMmodel
 本模型名称望庐模型，是基于规则生成医案数据联合Transformer模拟方证到方药之间的非线性复杂映射的中医模型。
+模型使用顺序：Generator->Transformer
