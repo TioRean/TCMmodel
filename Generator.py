@@ -479,5 +479,5 @@ for i in range(0,len(df)):
 shuffle(content)
 
 # 数据存储
-save(content, train_path='train_small.txt', val_path='val_small.txt', test_path='test_small.txt', val_ratio=0, test_ratio=0)
+save(content)
 
