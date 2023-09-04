@@ -15,7 +15,7 @@ from torchtext.vocab import build_vocab_from_iterator
 import io
 import os
 
-# ------------------------ 改良transformer模型 ---------------------------------
+# ------------------------ transformer模型 ---------------------------------
 
 # 构建Embeddings类
 class Embeddings(nn.Module):
