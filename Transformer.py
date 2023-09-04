@@ -948,7 +948,7 @@ def print_test_result(data_iter, model, vocabs, is_save=False, save_path='./test
     trg_itos = vocabs[1].get_itos()
     total_accuracy = 0
     count = 0
-    print('当前为训练模式：')
+    print('当前为测试模式：')
     print('==========================================================================================')
     for i, batch in enumerate(data_iter):
         if torch.cuda.is_available():
