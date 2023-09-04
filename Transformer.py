@@ -1031,6 +1031,11 @@ val_bz = 10
 val_datapipe = DataPipe(val_data_path, vocabs=train_vocabs , batch_size=val_bz, batch_num=5)
 val_dp = val_datapipe.get_datapipe()
 
+test_data_path = './test_data.txt'
+test_bz = 10
+test_datapipe = DataPipe(test_data_path, vocabs=train_vocabs , batch_size=test_bz, batch_num=5)
+test_dp = test_datapipe.get_datapipe()
+
 # 实例化transformer模型
 # 词嵌入大小
 emsize = 512
@@ -1088,7 +1093,7 @@ if __name__ == '__main__':
     path_checkpiont = './modelDict/checkpoint.pth'
 
     ml = ModelLoader(path_model, path_checkpiont, loss_compute)
-    ml.run_test(val_dp, is_save=True)
+    ml.run_test(test_dp, is_save=True)
 
 
 
