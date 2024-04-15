@@ -260,35 +260,31 @@ def montage(compulsory=None, optional=None, tongue_pulse=None, product_max_len=2
     # 3. tongue_pulse 内含多种组合之后的舌脉信息，将与compulsory及optional拼接
     # product_max_len 若optional及tongue_pulse皆较小时，即二者相乘的结果小于product_max_len时，用product方法适当增加返回结果的数量，防止返回结果过于疏散
     content = []
-    result = []
-    if compulsory is not None:
-        if tongue_pulse is not None:
-            content = copy.copy(tongue_pulse)
-            for i in range(len(compulsory)):
-                for instance in content:
-                    instance.insert(i, compulsory[i])
-        else:
+        result = []
+        if compulsory is not None:
             content = copy.copy([compulsory])
-    elif compulsory is None and tongue_pulse is not None:
-        content = copy.copy(tongue_pulse)
-    elif compulsory is None and tongue_pulse is None:
         if optional is not None:
-            return optional
-    if optional is not None:
-        if len(optional) * len(content) > product_max_len:
-            if len(optional) >= len(content):
-                result = overlap(long=optional, short=content)
+            if len(compulsory) > 0:
+                if len(compulsory) <= len(optional):
+                    content = self._overlap(long=optional, short=content, exchange=True)
+                else:
+                    content = self._overlap(long=content, short=optional, exchange=False)
             else:
-                result = overlap(long=content, short=optional, exchange=True)
+                content = optional
+        if tongue_pulse is not None:
+            if len(tongue_pulse) * len(content) > max_to_product:
+                if len(content) >= len(tongue_pulse):
+                    result = self._overlap(long=content, short=tongue_pulse, exchange=False)
+                else:
+                    result = self._overlap(long=tongue_pulse, short=content, exchange=True)
+            else:
+                raw_instances = product(content, tongue_pulse)
+                for raw_instance in raw_instances:
+                    instance_flatten = list(chain.from_iterable(raw_instance))
+                    result.append(instance_flatten)
         else:
-            instances_raw = product(optional, content)
-            for instance_raw in instances_raw:
-                # 将instance从instance_raw二维列表转化为instance_flatten一维列表
-                instance_flatten = list(chain.from_iterable(instance_raw))
-                result.append(instance_flatten)
-    else:
-        result = content
-    return result
+            result = content
+        return result
 
 
 #------------------规则生成医案数据模型的使用工具及数据处理工具---------------------
@@ -359,34 +355,13 @@ def tongue_pulse_add(arr):
 def get_elements_list_for_tongue_pulse(dataframe, i):
     # 专门用于获取某组数据舌脉的方法
     content = []
-    t_nature = get_elements(dataframe.loc[i, '舌淡白':'舌青'])
-    content.append(tongue_pulse_add(t_nature))
-
-    t_coating_color = get_elements(dataframe.loc[i, '白苔':'黑苔'])
-    content.append(tongue_pulse_add(t_coating_color))
-    t_coating_thickness = get_elements(dataframe.loc[i, '苔少':'苔厚'])
-    content.append(tongue_pulse_add(t_coating_thickness))
-    t_coating_humidity = get_elements(dataframe.loc[i, '苔水滑':'null'])
-    content.append(tongue_pulse_add(t_coating_humidity))
-    t_coating_character = get_elements(dataframe.loc[i, '苔腻':'null.1'])
-    content.append(tongue_pulse_add(t_coating_character))
-
-    p_rate = get_elements(dataframe.loc[i, '脉数':'null.2'])
-    content.append(tongue_pulse_add(p_rate))
-    p_rhythm = get_elements(dataframe.loc[i, '脉促':'null.3'])
-    content.append(tongue_pulse_add(p_rhythm))
-    p_position = get_elements(dataframe.loc[i, '脉浮':'null.4'])
-    content.append(tongue_pulse_add(p_position))
-    p_body = get_elements(dataframe.loc[i, '脉大':'null.5'])
-    content.append(tongue_pulse_add(p_body))
-    p_strength = get_elements(dataframe.loc[i, '脉虚':'null.6'])
-    content.append(tongue_pulse_add(p_strength))
-    p_fluency = get_elements(dataframe.loc[i, '脉滑':'null.7'])
-    content.append(tongue_pulse_add(p_fluency))
-    p_tension = get_elements(dataframe.loc[i, '脉弦':'null.8'])
-    content.append(tongue_pulse_add(p_tension))
-    p_complex = get_elements(dataframe.loc[i, '革脉':'null.9'])
-    content.append(tongue_pulse_add(p_complex))
+    trait_groups = (('舌淡白', '舌青'), ('白苔', '黑苔'), ('苔少', '苔厚'), ('苔水滑', 'null'), ('苔腻', 'null.1'),
+                    ('脉数', 'null.2'), ('脉促', 'null.3'), ('脉浮', 'null.4'), ('脉大', 'null.5'),
+                    ('脉虚', 'null.6'),
+                    ('脉滑', 'null.7'), ('脉弦', 'null.8'), ('革脉', 'null.9'))
+    for trait_group in trait_groups:
+        traits = CaseGenerator._get_elements(dataframe.loc[i, trait_group[0]:trait_group[1]])
+        content.append(CaseGenerator._tongue_pulse_add(traits))
     return content
 
 
