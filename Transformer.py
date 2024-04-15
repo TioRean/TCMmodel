@@ -733,7 +733,7 @@ class LabelSmoothing(nn.Module):
 
 
 class SimpleLossCompute:
-    # 计算loss，更新参数（在train模式下）
+    # 计算loss
     def __init__(self, generator, criterion, opt=None):
         self.generator = generator
         self.criterion = criterion
@@ -829,12 +829,12 @@ def run(model, loss_compute, train_dp, val_dp, vocabs, save_dict=None, epochs=5,
         print(f'---------------------当前第 {epoch}/{epochs} epoch--------------------')
         start = time.perf_counter()
 
-        # 进入训练模式，所有的参数将会被更新
+        # 进入训练模式
         print('当前为训练模式：')
         model.train()
         train_loss = run_epoch(data_generator(train_dp), model, loss_compute, vocabs,
                                print_interval=500)
-        # 进入评估模式，所有的参数固定不变
+        # 进入评估模式
         print('\n当前为验证模式: ')
         model.eval()
         val_loss = run_epoch(data_generator(val_dp), model, loss_compute, vocabs,
@@ -915,7 +915,7 @@ def src_to_trg(model, source, numerize, target_itos):
     if torch.cuda.is_available():
         src_tensor = src_tensor.cuda()
         source_mask = source_mask.cuda()
-    # 进入评估模式，参数不更新
+    # 进入评估模式
     model.eval()
     # 使用贪婪解码，即输出最大概率的target，设定解码的最大长度max_len等于20，起始数字的标志默认等于1
     result = greedy_decode(model, src_tensor, source_mask, max_len=20, start_symbol=1)
@@ -929,7 +929,7 @@ def src_tensor_to_target(model, source_tensor):
     # src_tensor_to_target方法将以张量为形式的源数据经过模型输出预测的target
     # 设置掩码张量
     source_mask = (source_tensor != 0).unsqueeze(-2)
-    # 进入评估模式，参数不更新
+    # 进入评估模式
     model.eval()
     # 使用贪婪解码，即输出最大概率的target，设定解码的最大长度max_len等于20，起始数字的标志默认等于1
     result = greedy_decode(model, source_tensor, source_mask, max_len=20, start_symbol=1)
